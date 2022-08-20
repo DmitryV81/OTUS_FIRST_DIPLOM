@@ -1,0 +1,7 @@
+[nginx-server]
+WebServer
+[wordpress-server]
+WebServer
+MySQLSlave
+[mysql-server]
+MySQLSlave

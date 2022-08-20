@@ -1,0 +1,24 @@
+---
+- name: Install Wordpress, Nginx and PHP-FPM
+  hosts: WebServer MySQLSlave
+  #become: true
+  remote_user: root
+
+  roles:
+  - nginx
+  - mysql
+  #- php-fpm
+  - wordpress
+
+#- name: Install MySQLMaster, MySQLSlave
+#  hosts: WebServer MySQLSlave
+  #become: true
+#  remote_user: root
+
+#  roles:
+    #- common
+#    - mysql
+    #- nginx
+    #- php-fpm
+
+...

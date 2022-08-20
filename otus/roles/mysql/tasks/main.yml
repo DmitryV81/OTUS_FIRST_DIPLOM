@@ -1,0 +1,126 @@
+---
+- name: disable firewalld
+  systemd:
+    name: firewalld
+    state: stopped
+    enabled: no
+  ignore_errors: yes
+  when: inventory_hostname in groups['mysql-server']
+
+- name: disable SELinux
+  ansible.posix.selinux:
+    state: disabled
+  when: inventory_hostname in groups['mysql-server']
+
+- name: Install MySQL repo
+  yum: name=http://dev.mysql.com/get/mysql80-community-release-el7-6.noarch.rpm state=present
+
+- name: Get GPG key
+  command: rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
+
+- name: Install MySQL
+  yum: pkg={{ item }}
+  loop:
+  - mysql-community-server
+  - mysql-community-client
+  - MySQL-python
+
+- name: Start the MySQL service
+  service: name=mysqld state=started enabled=true
+
+# Uncomment before first use!!!!!!!!!!!!!!!!!!!!!
+- name: Change mysql root password and keep track in
+  become: true
+  shell: |
+    password_match=`awk '/A temporary password is generated for/ {a=$0} END{ print a }' /var/log/mysqld.log | awk '{print $(NF)}'`
+    echo $password_match
+    mysql -uroot -p$password_match --connect-expired-password -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'Hunter1981!'; flush privileges; "
+    echo "[client]"
+    user=root
+    password=Hunter1981! > /root/.my.cnf
+  args:
+    creates: /root/.my.cnf
+  register: change_temp_pass
+  notify: restart mysqld
+- meta: flush_handlers
+- debug:
+    var: change_temp_pass
+#######################################
+- name: Remove all anonymous user accounts
+  mysql_user:
+    name: ''
+    host_all: yes
+    state: absent
+    #login_port: 3306
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+
+- name: Remove the MySQL test database
+  mysql_db:
+    name: test
+    state: absent
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+
+- name: Creates database for WordPress
+  mysql_db:
+    name: "{{ mysql_db }}"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+
+- name: Create MySQL user for WordPress
+  mysql_user:
+    name: "{{ mysql_user }}"
+    password: "{{ mysql_password }}"
+    priv: "{{ mysql_db }}.*:ALL"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+
+- name: Copy backup to servers
+  copy:
+    src: backupdb/wordpress
+    dest: /root/backupdb
+
+- name: Restore DB Wordpress
+  shell: |
+    DB=wordpress;
+    USER='root'
+    PASS='Hunter1981!'
+    DIR="/root/backupdb/wordpress"
+    for s in `ls -1 $DIR`;
+    do
+    echo "--> $s restoring... ";
+    zcat $DIR/$s | /usr/bin/mysql --user=$USER --password=$PASS $DB;
+    done
+########################################
+#Replication block there
+
+- name: Copy Slave MYSQLServer configuration
+  template: src=my_slave.cnf dest=/etc/my.cnf
+  when: inventory_hostname in groups['mysql-server']
+
+- name: Copy Master WebServer configuration
+  template: src=my_master.cnf dest=/etc/my.cnf
+  when: inventory_hostname in groups['nginx-server']
+
+- name: Start the MySQL service
+  service: name=mysqld state=restarted
+
+- name: Create replication user
+  shell: |
+    mysql -uroot -pHunter1981! -e "CREATE USER 'replication_user'@'%' IDENTIFIED WITH mysql_native_password BY 'Hunter1981!'; GRANT REPLICATION SLAVE ON *.* TO 'replication_user'@'%'; FLUSH PRIVILEGES; SET @@GLOBAL.read_only = ON;"
+  when: inventory_hostname in groups['wordpress-server']
+
+
+- name: Settings Slave
+  shell: |
+    mysql -uroot -pHunter1981! -e "SET @@GLOBAL.read_only = ON; CHANGE REPLICATION SOURCE TO SOURCE_HOST='192.168.1.188', SOURCE_USER='replication_user', SOURCE_PASSWORD='Hunter1981!', SOURCE_AUTO_POSITION=1; start replica;"
+  when: inventory_hostname in groups['mysql-server']
+
+- name: unset global read only
+  shell: |
+    mysql -uroot -pHunter1981! -e "SET @@GLOBAL.read_only = OFF;"
+
+...

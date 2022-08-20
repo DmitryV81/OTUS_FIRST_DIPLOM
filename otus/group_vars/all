@@ -1,0 +1,27 @@
+---
+#MySQL settings
+mysqlservice: mysqld
+mysql_port: 3306
+#MySQL replica
+path_to_source_server: 192.168.1.188
+source_user: replication_user
+source_password: Hunter1981!
+#WordPress database settings
+mysql_db: wordpress
+mysql_user: wordpress
+mysql_password: 'PassW0rd1!'
+mysql_root_password: 'Hunter1981!'
+#wp_db_host: 192.168.56.9
+
+#Nginx server configurations
+nginx_port: 80
+server_hostname: otus.work.com
+backend1: 127.0.0.1
+backend2: 192.168.1.196
+
+#Disable all updates
+auto_up_disable: false
+
+# Define core update level
+core_update_level: true
+...

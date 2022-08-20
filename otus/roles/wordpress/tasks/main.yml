@@ -1,0 +1,13 @@
+---
+- name: Download and unpack latest WordPress
+  unarchive:
+    src: https://wordpress.org/latest.tar.gz
+    dest: "/var/www/html"
+    remote_src: yes
+    extra_opts: [--strip-components=1]
+    #creates: "/var/www/html/"
+
+- name: Set up wp-config
+  template:
+    src: "templates/wp-config.php"
+    dest: "/var/www/html/wp-config.php"

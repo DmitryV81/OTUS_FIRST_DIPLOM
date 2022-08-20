@@ -1,0 +1,85 @@
+---
+- name: Install epel-release
+  yum:
+    name: epel-release
+    state: present
+
+- name: Update cache
+  yum: update_cache=yes
+
+- name: Install nginx
+  yum:
+    name: nginx
+    state: present
+  when: inventory_hostname in groups['nginx-server']
+
+- name: Install http
+  yum:
+    name: "{{ item }}"
+    state: latest
+  loop:
+    - httpd
+    - php-mcrypt
+    - php-cli
+    - php-gd
+    - php-curl
+    - php-ldap
+    - php-zip
+    - php-fileinfo
+    - php
+    - php72
+    - php-fpm
+    - php-mbstring
+    - php-IDNA_Convert
+    - php-PHPMailer
+    - php-process
+    - php-simplepie
+    - php-xml
+    - php-mysql
+  
+- name: disable firewalld
+  systemd:
+    name: firewalld
+    state: stopped
+    enabled: no
+  ignore_errors: yes
+
+- name: disable SELinux
+  ansible.posix.selinux:
+    state: disabled
+
+- name: Copy nginx configuration for wordpress
+  template: src=default_nginx.conf dest=/etc/nginx/conf.d/default.conf
+  notify: restart nginx
+  when: inventory_hostname in groups['nginx-server']
+
+- name: Copy httpd configuration for wordpress
+  template: src=default_httpd.conf dest=/etc/httpd/conf.d/main.conf
+  notify: restart httpd
+
+- name: Copy main httpd configuration for wordpress
+  template: src=httpd.conf dest=/etc/httpd/conf/httpd.conf
+  notify: restart httpd
+
+- name: chown user "apache"
+  shell: "chown -R apache.apache /var/www/html/"
+
+- name: Set permissions for directories
+  shell: "/usr/bin/find /var/www/html/ -type d -exec chmod 750 {} \\;"
+
+- name: Set permissions for files
+  shell: "/usr/bin/find /var/www/html/ -type f -exec chmod 640 {} \\;"
+
+- name: nginx service state
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+  when: inventory_hostname in groups['nginx-server']
+
+- name: httpd service state
+  service:
+    name: httpd
+    state: started
+    enabled: yes
+...
