@@ -46,54 +46,54 @@
 - debug:
     var: change_temp_pass
 #######################################
-- name: Remove all anonymous user accounts
-  mysql_user:
-    name: ''
-    host_all: yes
-    state: absent
-    #login_port: 3306
-    login_user: root
-    login_password: "{{ mysql_root_password }}"
+#- name: Remove all anonymous user accounts
+#  mysql_user:
+#    name: ''
+#    host_all: yes
+#    state: absent
+#    #login_port: 3306
+#    login_user: root
+#    login_password: "{{ mysql_root_password }}"
 
-- name: Remove the MySQL test database
-  mysql_db:
-    name: test
-    state: absent
-    login_user: root
-    login_password: "{{ mysql_root_password }}"
+#- name: Remove the MySQL test database
+#  mysql_db:
+#    name: test
+#    state: absent
+#    login_user: root
+#    login_password: "{{ mysql_root_password }}"
 
-- name: Creates database for WordPress
-  mysql_db:
-    name: "{{ mysql_db }}"
-    state: present
-    login_user: root
-    login_password: "{{ mysql_root_password }}"
+#- name: Creates database for WordPress
+#  mysql_db:
+#    name: "{{ mysql_db }}"
+#    state: present
+#    login_user: root
+#    login_password: "{{ mysql_root_password }}"
 
-- name: Create MySQL user for WordPress
-  mysql_user:
-    name: "{{ mysql_user }}"
-    password: "{{ mysql_password }}"
-    priv: "{{ mysql_db }}.*:ALL"
-    state: present
-    login_user: root
-    login_password: "{{ mysql_root_password }}"
+#- name: Create MySQL user for WordPress
+#  mysql_user:
+#    name: "{{ mysql_user }}"
+#    password: "{{ mysql_password }}"
+#    priv: "{{ mysql_db }}.*:ALL"
+#    state: present
+#    login_user: root
+#    login_password: "{{ mysql_root_password }}"
 
-- name: Copy backup to servers
-  copy:
-    src: backupdb/wordpress
-    dest: /root/backupdb
+#- name: Copy backup to servers
+#  copy:
+#    src: backupdb/wordpress
+#    dest: /root/backupdb
 
-- name: Restore DB Wordpress
-  shell: |
-    DB=wordpress;
-    USER='root'
-    PASS='Hunter1981!'
-    DIR="/root/backupdb/wordpress"
-    for s in `ls -1 $DIR`;
-    do
-    echo "--> $s restoring... ";
-    zcat $DIR/$s | /usr/bin/mysql --user=$USER --password=$PASS $DB;
-    done
+#- name: Restore DB Wordpress
+#  shell: |
+#    DB=wordpress;
+#    USER='root'
+#    PASS='Hunter1981!'
+#    DIR="/root/backupdb/wordpress"
+#    for s in `ls -1 $DIR`;
+#    do
+#    echo "--> $s restoring... ";
+#    zcat $DIR/$s | /usr/bin/mysql --user=$USER --password=$PASS $DB;
+#    done
 ########################################
 #Replication block there
 
@@ -122,5 +122,60 @@
 - name: unset global read only
   shell: |
     mysql -uroot -pHunter1981! -e "SET @@GLOBAL.read_only = OFF;"
+
+- name: Remove all anonymous user accounts
+  mysql_user:
+    name: ''
+    host_all: yes
+    state: absent
+    #login_port: 3306
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+  when: inventory_hostname in groups['nginx-server']
+
+- name: Remove the MySQL test database
+  mysql_db:
+    name: test
+    state: absent
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+  when: inventory_hostname in groups['nginx-server']
+
+- name: Creates database for WordPress
+  mysql_db:
+    name: "{{ mysql_db }}"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+  when: inventory_hostname in groups['nginx-server']
+
+- name: Create MySQL user for WordPress
+  mysql_user:
+    name: "{{ mysql_user }}"
+    password: "{{ mysql_password }}"
+    priv: "{{ mysql_db }}.*:ALL"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+  when: inventory_hostname in groups['nginx-server']
+
+- name: Copy backup to servers
+  copy:
+    src: backupdb/wordpress
+    dest: /root/backupdb
+  when: inventory_hostname in groups['nginx-server']
+
+- name: Restore DB Wordpress
+  shell: |
+    DB=wordpress;
+    USER='root'
+    PASS='Hunter1981!'
+    DIR="/root/backupdb/wordpress"
+    for s in `ls -1 $DIR`;
+    do
+    echo "--> $s restoring... ";
+    zcat $DIR/$s | /usr/bin/mysql --user=$USER --password=$PASS $DB;
+    done
+  when: inventory_hostname in groups['nginx-server']
 
 ...

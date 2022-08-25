@@ -2,10 +2,16 @@
 - name: Install epel-release
   yum:
     name: epel-release
-    state: present
+    state: latest
 
 - name: Update cache
   yum: update_cache=yes
+
+- name: download remi repo rpm
+  get_url: url=http://rpms.famillecollet.com/enterprise/remi-release-7.rpm dest=/root/  
+
+- name: install remi repo rpm
+  yum: name=/root/remi-release-7.rpm state=present
 
 - name: Install nginx
   yum:
