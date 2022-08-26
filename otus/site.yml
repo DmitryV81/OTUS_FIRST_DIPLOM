@@ -1,24 +1,27 @@
 ---
-- name: Install Wordpress, Nginx and PHP-FPM
-  hosts: WebServer MySQLSlave
-  #become: true
+#- name: Install Wordpress, Nginx and PHP-FPM
+#  hosts: WebServer MySQLSlave
+#  remote_user: root
+#  roles:
+#  - nginx
+#  - mysql
+#  - wordpress
+
+- name: Install MySQLMaster, MySQLSlave
+  hosts: WebServer
   remote_user: root
 
   roles:
-  - nginx
-  - mysql
-  #- php-fpm
-  - wordpress
-
-#- name: Install MySQLMaster, MySQLSlave
-#  hosts: WebServer MySQLSlave
-  #become: true
-#  remote_user: root
-
-#  roles:
     #- common
-#    - mysql
+    - node_exporter
     #- nginx
     #- php-fpm
+
+- name: Install Prometheus
+  hosts: Prometheus
+  remote_user: root
+
+  roles:
+    - prometheus
 
 ...

@@ -5,3 +5,5 @@ WebServer
 MySQLSlave
 [mysql-server]
 MySQLSlave
+[prometheus]
+Prometheus
