@@ -3,7 +3,7 @@
 mysqlservice: mysqld
 mysql_port: 3306
 #MySQL replica
-path_to_source_server: 192.168.56.111
+path_to_source_server: 192.168.1.188
 source_user: replication_user
 source_password: Hunter1981!
 #WordPress database settings
@@ -17,7 +17,7 @@ mysql_root_password: 'Hunter1981!'
 nginx_port: 80
 server_hostname: otus.work.com
 backend1: 127.0.0.1
-backend2: 192.168.56.108
+backend2: 192.168.1.196
 
 #Disable all updates
 auto_up_disable: false
@@ -45,13 +45,14 @@ prometheus_var_config:
   global:
     scrape_interval: "{{ prometheus_scrape_interval }}"
     evaluation_interval: 5s
-    external_labels:
-      env: '{{ prometheus_env }}'
   scrape_configs:
     - job_name: prometheus
       scrape_interval: 5m
       static_configs:
-        - targets: ['{{ inventory_hostname }}:9090']
+        - targets: ['localhost:9090']
 
+############################
+#Grafana adnib password
+grafana_admin_password: "hunter1981"
 
 ...

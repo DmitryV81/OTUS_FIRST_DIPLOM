@@ -7,3 +7,5 @@ MySQLSlave
 MySQLSlave
 [prometheus]
 Prometheus
+[grafana]
+Prometheus

@@ -51,7 +51,7 @@
 #    name: ''
 #    host_all: yes
 #    state: absent
-#    #login_port: 3306
+    #login_port: 3306
 #    login_user: root
 #    login_password: "{{ mysql_root_password }}"
 
@@ -76,7 +76,7 @@
 #    priv: "{{ mysql_db }}.*:ALL"
 #    state: present
 #    login_user: root
-#    login_password: "{{ mysql_root_password }}"
+ #   login_password: "{{ mysql_root_password }}"
 
 #- name: Copy backup to servers
 #  copy:
@@ -128,7 +128,7 @@
     name: ''
     host_all: yes
     state: absent
-    #login_port: 3306
+   #login_port: 3306
     login_user: root
     login_password: "{{ mysql_root_password }}"
   when: inventory_hostname in groups['nginx-server']
