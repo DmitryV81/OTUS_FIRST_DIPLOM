@@ -3,7 +3,7 @@
 mysqlservice: mysqld
 mysql_port: 3306
 #MySQL replica
-path_to_source_server: 192.168.1.188
+path_to_source_server: 192.168.56.113
 source_user: replication_user
 source_password: Hunter1981!
 #WordPress database settings
@@ -17,7 +17,7 @@ mysql_root_password: 'Hunter1981!'
 nginx_port: 80
 server_hostname: otus.work.com
 backend1: 127.0.0.1
-backend2: 192.168.1.196
+backend2: 192.168.56.112
 
 #Disable all updates
 auto_up_disable: false
@@ -54,5 +54,7 @@ prometheus_var_config:
 ############################
 #Grafana adnib password
 grafana_admin_password: "hunter1981"
-
+############################
+#ELK server IP
+elk_server_ip: 192.168.56.114
 ...

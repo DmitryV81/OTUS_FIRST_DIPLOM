@@ -9,3 +9,5 @@ MySQLSlave
 Prometheus
 [grafana]
 Prometheus
+[ELK]
+elk

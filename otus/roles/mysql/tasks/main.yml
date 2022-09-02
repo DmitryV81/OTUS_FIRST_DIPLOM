@@ -51,7 +51,7 @@
 #    name: ''
 #    host_all: yes
 #    state: absent
-    #login_port: 3306
+   #login_port: 3306
 #    login_user: root
 #    login_password: "{{ mysql_root_password }}"
 
@@ -76,7 +76,7 @@
 #    priv: "{{ mysql_db }}.*:ALL"
 #    state: present
 #    login_user: root
- #   login_password: "{{ mysql_root_password }}"
+#    login_password: "{{ mysql_root_password }}"
 
 #- name: Copy backup to servers
 #  copy:
@@ -111,24 +111,25 @@
 - name: Create replication user
   shell: |
     mysql -uroot -pHunter1981! -e "CREATE USER 'replication_user'@'%' IDENTIFIED WITH mysql_native_password BY 'Hunter1981!'; GRANT REPLICATION SLAVE ON *.* TO 'replication_user'@'%'; FLUSH PRIVILEGES; SET @@GLOBAL.read_only = ON;"
-  when: inventory_hostname in groups['wordpress-server']
+  when: inventory_hostname in groups['nginx-server']
 
 
 - name: Settings Slave
   shell: |
-    mysql -uroot -pHunter1981! -e "SET @@GLOBAL.read_only = ON; CHANGE REPLICATION SOURCE TO SOURCE_HOST='192.168.1.188', SOURCE_USER='replication_user', SOURCE_PASSWORD='Hunter1981!', SOURCE_AUTO_POSITION=1; start replica;"
+    mysql -uroot -pHunter1981! -e "SET @@GLOBAL.read_only = ON; CHANGE REPLICATION SOURCE TO SOURCE_HOST='192.168.56.113', SOURCE_USER='replication_user', SOURCE_PASSWORD='Hunter1981!', SOURCE_AUTO_POSITION=1; start replica;"
   when: inventory_hostname in groups['mysql-server']
 
 - name: unset global read only
   shell: |
     mysql -uroot -pHunter1981! -e "SET @@GLOBAL.read_only = OFF;"
+  when: inventory_hostname in groups['nginx-server']
 
 - name: Remove all anonymous user accounts
   mysql_user:
     name: ''
     host_all: yes
     state: absent
-   #login_port: 3306
+  #login_port: 3306
     login_user: root
     login_password: "{{ mysql_root_password }}"
   when: inventory_hostname in groups['nginx-server']

@@ -7,11 +7,20 @@
 - name: Update cache
   yum: update_cache=yes
 
+#- name: Purge php
+#  yum:
+#    name: php*
+#    state: absent
+
 - name: download remi repo rpm
   get_url: url=http://rpms.famillecollet.com/enterprise/remi-release-7.rpm dest=/root/  
 
 - name: install remi repo rpm
   yum: name=/root/remi-release-7.rpm state=present
+#- name: Installing Remi Repo
+#  yum:
+#    name: https://rpms.remirepo.net/enterprise/remi-release-7.rpm
+#    state: present
 
 - name: Install nginx
   yum:
@@ -21,6 +30,7 @@
 
 - name: Install http
   yum:
+    enablerepo: "remi,remi-php72"
     name: "{{ item }}"
     state: latest
   loop:

@@ -4,20 +4,20 @@
   remote_user: root
   roles:
 #  - nginx
-  - mysql
+#  - mysql
 #  - wordpress
 #  - node_exporter
-
-#- name: Install MySQLMaster, MySQLSlave
-#  hosts: WebServer
-#  remote_user: root
-#  roles:
-#    - node_exporter
-
-- name: Install Prometheus
-  hosts: Prometheus
+  - filebeat
+- name: Install ELK
+  hosts: elk
   remote_user: root
   roles:
+    - elk
+
+#- name: Install Prometheus
+#  hosts: Prometheus
+#  remote_user: root
+#  roles:
 #    - prometheus
 #    - grafana
 

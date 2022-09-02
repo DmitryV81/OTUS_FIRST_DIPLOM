@@ -1,0 +1,89 @@
+---
+# Disable firewalld and selinux
+- name: disable firewalld
+  systemd:
+    name: firewalld
+    state: stopped
+    enabled: no
+  ignore_errors: yes
+
+- name: disable SELinux
+  ansible.posix.selinux:
+    state: disabled
+
+# Install ElasticSearch
+- name: Copy install file
+  copy:
+    src: elasticsearch_7.17.3_x86_64-224190-9bcb26.rpm
+    dest: /root/elasticsearch_7.17.3_x86_64-224190-9bcb26.rpm  
+
+- name: Install Elasticsearch
+  yum:
+    name: /root/elasticsearch_7.17.3_x86_64-224190-9bcb26.rpm
+    state: present
+
+- name: config elasticsearch
+  template:
+    src: jvm.options
+    dest: /etc/elasticsearch/jvm.options.d/jvm.options
+
+- name: start Elasticsearch service
+  service:
+    name: elasticsearch
+    state: started
+    enabled: yes
+
+# Install Kibana
+- name: Copy install file
+  copy:
+    src: kibana_7.17.3_x86_64-224190-b13e53.rpm
+    dest: /root/kibana_7.17.3_x86_64-224190-b13e53.rpm
+
+- name: Install Kibana
+  yum:
+    name: /root/kibana_7.17.3_x86_64-224190-b13e53.rpm
+    state: present
+
+- name: Copy Kibana config
+  template:
+    src: kibana.yml
+    dest: /etc/kibana/kibana.yml
+
+- name: Start Kibana service
+  service:
+    name: kibana
+    state: started
+    enabled: yes
+
+
+# Install LogStash
+- name: Copy install file
+  copy:
+    src: logstash_7.17.3_x86_64-224190-3a605f.rpm
+    dest: /root/logstash_7.17.3_x86_64-224190-3a605f.rpm
+
+- name: Install Logstash
+  yum:
+    name: /root/logstash_7.17.3_x86_64-224190-3a605f.rpm
+    state: present
+
+- name: Copy Logstash config
+  template:
+    src: logstash.yml
+    dest: /etc/logstash/logstash.yml
+
+- name: Copy logstash conf for nginx
+  template:
+    src: logstash-nginx-es.conf
+    dest: /etc/logstash/conf.d/logstash-nginx-es.conf
+
+- name: Start Logstash service
+  service:
+    name: logstash
+    state: started
+    enabled: yes
+
+# Install Filebeats
+
+
+...

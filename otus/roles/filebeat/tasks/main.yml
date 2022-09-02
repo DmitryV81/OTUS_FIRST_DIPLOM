@@ -1,0 +1,28 @@
+---
+# Install filebeat
+- name: copy fileabeat on nginx server
+  copy:
+    src: filebeat_7.17.3_x86_64-224190-4c3205.rpm
+    dest: /root/filebeat_7.17.3_x86_64-224190-4c3205.rpm
+  when: inventory_hostname in groups['nginx-server']
+
+- name: Install filebeat
+  yum:
+    name: /root/filebeat_7.17.3_x86_64-224190-4c3205.rpm
+    state: present
+  when: inventory_hostname in groups['nginx-server']
+
+- name: copy filebeat config
+  template:
+    src: filebeat.yml
+    dest: /etc/filebeat/filebeat.yml
+  when: inventory_hostname in groups['nginx-server']
+
+- name: Start filebeat service
+  service:
+    name: filebeat
+    state: started
+    enabled: yes
+  when: inventory_hostname in groups['nginx-server']
+
+...
